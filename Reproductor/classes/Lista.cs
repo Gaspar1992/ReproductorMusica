@@ -7,7 +7,7 @@ using Plugin.Logs;
 
 namespace Reproductor.classes
 {
-    class Lista
+    public class Lista
     {
         private List<Cancion> Canciones;
         private readonly string folder = Properties.Settings.Default.completeFolder;

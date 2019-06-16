@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 
 namespace Reproductor.classes
 {
-    class Estado
+    public class Estado
     {
         public string NombreLista { get; set; }
         public string NombreCancion { get; set; }
         public double PuntoCancion { get; set; }
+        public int Volumen { get; set; }
     }
 }

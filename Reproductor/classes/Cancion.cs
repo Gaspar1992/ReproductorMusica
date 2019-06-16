@@ -3,7 +3,7 @@
 
 namespace Reproductor.classes
 {
-    class Cancion
+    public class Cancion
     {
         public string Titulo { get; set; }
         public string Artista { get; set; }

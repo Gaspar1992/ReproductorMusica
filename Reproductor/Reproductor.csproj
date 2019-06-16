@@ -87,7 +87,6 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <None Include="packages.config" />
-    <None Include="Properties\DataSources\Reproductor.classes.Cancion.datasource" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -131,6 +130,7 @@
     <Content Include="src\images\repeat.png" />
     <Content Include="src\images\sound.png" />
     <Content Include="src\images\stop.png" />
+    <Content Include="src\music\123123.mp3" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

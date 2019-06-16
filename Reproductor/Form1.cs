@@ -89,14 +89,18 @@ namespace Reproductor
                         lstCanciones.Items.Add(aux);
                     }
 
-                    lstCanciones.SelectedIndex = 0;
-                    Cancion actual = listas[lstListas.SelectedIndex].GetCancion(lstCanciones.SelectedIndex);
-                    if (actual != null)
+                    if(lstCanciones.SelectedIndex == -1)
                     {
-                        reproductorMedia.URL = actual.RutaArchivo;
-                        lblSong.Text = actual.ToString();
-                        Play = true;
+                        lstCanciones.SelectedIndex = 0;
+                        Cancion actual = listas[lstListas.SelectedIndex].GetCancion(lstCanciones.SelectedIndex);
+                        if (actual != null)
+                        {
+                            reproductorMedia.URL = actual.RutaArchivo;
+                            lblSong.Text = actual.ToString();
+                            Play = true;
+                        }
                     }
+
 
                     UpdateCanciones();
                 }
@@ -115,31 +119,42 @@ namespace Reproductor
 
             try
             {
+
+                if (!File.Exists(Properties.Settings.Default.estadoFolder))
+                    return;
+
+                Logger.Info("Cargando estado ...");
                 Estado estado = JsonConvert.DeserializeObject<Estado>(File.ReadAllText(Properties.Settings.Default.estadoFolder));
 
-                for (int i = 0; i < listas.Count; i++)
+                if(estado.NombreLista != null && estado.NombreCancion != null)
                 {
-                    if (!listas[i].GetNombre().Equals(estado.NombreLista))
-                        continue;
+                    for (int i = 0; i < listas.Count; i++)
+                    {
+                        if (!listas[i].GetNombre().Equals(estado.NombreLista))
+                            continue;
 
-                    lstListas.SelectedIndex = i;
-                    UpdateCanciones();
-                    break;
+                        lstListas.SelectedIndex = i;
+                        UpdateCanciones();
+                        break;
+                    }
+
+                    List<Cancion> canciones = listas[lstListas.SelectedIndex].GetCanciones();
+
+                    for (int i = 0; i < canciones.Count; i++)
+                    {
+                        if (!canciones[i].Archivo.Equals(estado.NombreCancion))
+                            continue;
+
+                        lstCanciones.SelectedIndex = i;
+                        reproductorMedia.URL = canciones[i].RutaArchivo;
+                        reproductorMedia.Ctlcontrols.currentPosition = estado.PuntoCancion;
+                        reproductorMedia.Ctlcontrols.pause();
+                        break;
+                    }
                 }
 
-                List<Cancion> canciones = listas[lstListas.SelectedIndex].GetCanciones();
-
-                for (int i = 0; i < canciones.Count; i++)
-                {
-                    if (!canciones[i].Archivo.Equals(estado.NombreCancion))
-                        continue;
-
-                    lstCanciones.SelectedIndex = i;
-                    reproductorMedia.URL = canciones[i].RutaArchivo;
-                    reproductorMedia.Ctlcontrols.currentPosition = estado.PuntoCancion;
-                    reproductorMedia.Ctlcontrols.pause();
-                    break;
-                }
+                reproductorMedia.settings.volume = estado.Volumen;
+                Logger.Info("Estado cargado");
             }
             catch (Exception excepcion)
             {
@@ -278,7 +293,7 @@ namespace Reproductor
         private void TrckSound_ValueChanged(object sender, decimal value)
         {
             reproductorMedia.settings.volume = trckSound.Value;
-            SoundAux = trckSound.Value;
+            SoundAux = trckSound.Value > 0 ? trckSound.Value : SoundAux;
             btnSound.Image = trckSound.Value > 0 ? Properties.Resources.sound : Properties.Resources.no_sound;
         }
 
@@ -422,9 +437,10 @@ namespace Reproductor
 
                 Estado estado = new Estado
                 {
-                    NombreLista = listas[lstListas.SelectedIndex].GetNombre(),
-                    NombreCancion = listas[lstListas.SelectedIndex].GetCancion(lstCanciones.SelectedIndex).Archivo,
-                    PuntoCancion = reproductorMedia.Ctlcontrols.currentPosition
+                    NombreLista = lstListas.SelectedIndex == -1 ? null : listas[lstListas.SelectedIndex].GetNombre(),
+                    NombreCancion = lstCanciones.SelectedIndex == -1 ? null : listas[lstListas.SelectedIndex].GetCancion(lstCanciones.SelectedIndex).Archivo,
+                    PuntoCancion = reproductorMedia.Ctlcontrols.currentPosition,
+                    Volumen = reproductorMedia.settings.volume
                 };
 
                 string json = JsonConvert.SerializeObject(estado, Formatting.Indented);
